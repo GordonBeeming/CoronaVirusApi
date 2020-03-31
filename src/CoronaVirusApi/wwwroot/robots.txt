@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+SITEMAP: https://lazy-developer.xyz/sitemap.xml

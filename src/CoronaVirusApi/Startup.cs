@@ -128,7 +128,7 @@ namespace CoronaVirusApi
         });
       });
 
-      //AddStaticFilesLastToThePipeline(app, env);
+      AddStaticFilesLastToThePipeline(app, env);
 
       var zaCulture = (CultureInfo)CultureInfo.GetCultureInfo("en-za").Clone();
       var zaCultureNumberFormat = (NumberFormatInfo)zaCulture.NumberFormat.Clone();
