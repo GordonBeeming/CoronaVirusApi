@@ -41,7 +41,7 @@ namespace CoronaVirusApi.BackgroundServices
 
       while (!stoppingToken.IsCancellationRequested)
       {
-        await Time($"UpdateDataBackgroundService running", async (stoppingToken) =>
+        if (!await Time($"UpdateDataBackgroundService running", async (stoppingToken) =>
         {
           if (!await DownloadNewFile(stoppingToken))
           {
@@ -56,7 +56,10 @@ namespace CoronaVirusApi.BackgroundServices
             return false;
           }
           return true;
-        }, stoppingToken);
+        }, stoppingToken))
+        {
+          dataStorage.SetLatestLoadError();
+        }
 
         latestSourceData = null;
         latestJsonData = null;

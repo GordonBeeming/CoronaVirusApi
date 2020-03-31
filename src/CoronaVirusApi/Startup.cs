@@ -90,7 +90,7 @@ namespace CoronaVirusApi
 <sub>another project by <a href='https://lazy-developer.xyz/' target='_blank'>the lazy developer</a></sub>
 <p>
   This project is hosted on GitHub at
-  <a href='https://github.com/Gordon-Beeming' target='_blank'>GordonBeeming</a>
+  <a href='https://github.com/Gordon-Beeming' target='_blank'>Gordon-Beeming</a>
   /
   <a href='https://github.com/Gordon-Beeming/CoronaVirusApi' target='_blank'>CoronaVirusApi</a>
 <br/>
