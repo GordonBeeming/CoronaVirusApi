@@ -24,7 +24,7 @@ jobs:
         buildId=$GITHUB_RUN_NUMBER
         buildNumber="$buildDateNumber.$buildId"
         echo "$buildNumber"
-        projContent=$(sed "s/99.99.99.99/$buildNumber/g" CoronaVirusApi.csproj)
+        projContent=$(sed "s+<Version>[0-9][0-9]*.*[0-9]*.*[0-9]*.*</Version>+<Version>$buildNumber</Version>+g" CoronaVirusApi.csproj)
         echo "$projContent" > CoronaVirusApi.csproj
       working-directory: src/CoronaVirusApi
 
