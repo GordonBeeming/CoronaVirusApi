@@ -1,5 +1,3 @@
-﻿# This shouldn't be needed for my blog but has some details 
-# of how you can communicate with me if needed for another service.
-Contact: mailto:security@lazy-developer.xyz
+﻿Contact: mailto:security@lazy-developer.xyz
 Contact: https://twitter.com/GordonBeeming
 Encryption: https://keybase.io/gordonbeeming
