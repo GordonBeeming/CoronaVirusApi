@@ -19,11 +19,10 @@ jobs:
         
     - name: 'update version'
       shell: bash
-      run: 
+      run: |
         buildDateNumber=$(date '+%Y.%m.%d')
         buildId=$GITHUB_RUN_ID
         buildNumber="$buildDateNumber.$buildId"
-
         projContent=$(sed 's/99.99.99.99/$buildNumber/g' CoronaVirusApi.csproj)
         echo "$projContent" > CoronaVirusApi.csproj
       working-directory: src/CoronaVirusApi
