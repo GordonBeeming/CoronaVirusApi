@@ -16,6 +16,7 @@ namespace CoronaVirusApi.BackgroundServices
   {
     private readonly ILogger<UpdateDataBackgroundService> logger;
     private readonly OpenDataHttpService openDataHttpService;
+    private readonly DataStorage dataStorage;
     private readonly ServiceConfig config;
 
     private string? latestJsonData = null;
@@ -23,10 +24,12 @@ namespace CoronaVirusApi.BackgroundServices
 
     public UpdateDataBackgroundService(ILogger<UpdateDataBackgroundService> logger,
       IOptions<ServiceConfig> serviceConfig,
-      OpenDataHttpService openDataHttpService)
+      OpenDataHttpService openDataHttpService,
+      DataStorage dataStorage)
     {
       this.logger = logger;
       this.openDataHttpService = openDataHttpService;
+      this.dataStorage = dataStorage;
       this.config = serviceConfig.Value;
     }
 
@@ -70,7 +73,7 @@ namespace CoronaVirusApi.BackgroundServices
       {
         if (latestSourceData != null)
         {
-          await DataStorage.SetSourceData(latestSourceData);
+          await dataStorage.SetSourceData(latestSourceData, stoppingToken);
         }
         return true;
       }, stoppingToken);
@@ -146,9 +149,9 @@ namespace CoronaVirusApi.BackgroundServices
       {
         result = await work(stoppingToken);
       }
-      catch// (Exception ex)
+      catch (Exception ex)
       {
-
+        logger.LogError(ex, $"Unknown error in {message}");
         error = true;
       }
       DateTime endTime = DateTime.UtcNow;
@@ -170,9 +173,9 @@ namespace CoronaVirusApi.BackgroundServices
       return result && !error;
     }
 
-    private static string GetBucketName(int value)
+    private string GetBucketName(int value)
     {
-      foreach (var bucket in DataStorage.GetBuckets())
+      foreach (var bucket in dataStorage.GetBuckets())
       {
         if (bucket.IsNumberMatch(value))
         {

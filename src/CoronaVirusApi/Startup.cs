@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CoronaVirusApi.BackgroundServices;
 using CoronaVirusApi.BackgroundServices.Config;
+using CoronaVirusApi.Config;
 using CoronaVirusApi.HttpServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -38,7 +39,10 @@ namespace CoronaVirusApi
 
       services.AddResponseCaching();
 
+      services.AddSingleton<DataStorage>();
+
       services.Configure<ServiceConfig>(Configuration.GetSection("ServiceConfig"));
+      services.Configure<AzureStorageConfig>(Configuration.GetSection("AzureStorage"));
 
       services.AddHttpClient<OpenDataHttpService>();
 

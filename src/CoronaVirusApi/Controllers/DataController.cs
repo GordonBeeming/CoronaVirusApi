@@ -7,14 +7,17 @@ namespace CoronaVirusApi.Controllers
   [Route("[controller]")]
   public class DataController : ControllerBase
   {
-    public DataController()
+    private readonly DataStorage dataStorage;
+
+    public DataController(DataStorage dataStorage)
     {
+      this.dataStorage = dataStorage;
     }
 
     [HttpGet("raw")]
     public SourceData Raw()
     {
-      return DataStorage.GetSourceData();
+      return dataStorage.GetSourceData();
     }
   }
 }

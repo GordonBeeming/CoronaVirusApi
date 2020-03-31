@@ -10,6 +10,8 @@ namespace CoronaVirusApi.Models
     public List<Record> Records { get; set; }
 
     public DateTime LastUpdate { get; set; } = DateTime.UtcNow;
+
+    public bool UpdateError { get; set; } = false;
   }
 
   public class Record

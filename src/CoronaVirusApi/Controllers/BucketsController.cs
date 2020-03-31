@@ -8,10 +8,17 @@ namespace CoronaVirusApi.Controllers
   [Route("[controller]")]
   public class BucketsController : ControllerBase
   {
+    private readonly DataStorage dataStorage;
+
+    public BucketsController(DataStorage dataStorage)
+    {
+      this.dataStorage = dataStorage;
+    }
+
     [HttpGet]
     public IEnumerable<Bucket> Get()
     {
-      return DataStorage.GetBuckets();
+      return dataStorage.GetBuckets();
     }
   }
 }
