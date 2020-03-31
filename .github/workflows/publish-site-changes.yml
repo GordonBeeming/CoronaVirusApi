@@ -21,7 +21,7 @@ jobs:
       shell: bash
       run: |
         buildDateNumber=$(date '+%Y.%m.%d')
-        buildId=$GITHUB_RUN_ID
+        buildId=$GITHUB_RUN_NUMBER
         buildNumber="$buildDateNumber.$buildId"
         echo "$buildNumber"
         projContent=$(sed "s/99.99.99.99/$buildNumber/g" CoronaVirusApi.csproj)
