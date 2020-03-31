@@ -123,7 +123,7 @@ namespace CoronaVirusApi.BackgroundServices
           }
           foreach (var record in recordsInGeo)
           {
-            record.FocusCountry = casesCount >= 250 || deathsCount >= 100;
+            record.FocusCountry = casesCount >= Constants.FocusCountryCases || deathsCount >= Constants.FocusCountryDeaths;
             record.CasesBucket = GetBucketName(casesCount);
             record.DeathsBucket = GetBucketName(deathsCount);
           }

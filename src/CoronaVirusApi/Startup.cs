@@ -5,7 +5,14 @@ using System.Threading.Tasks;
 using CoronaVirusApi.BackgroundServices;
 using CoronaVirusApi.BackgroundServices.Config;
 using CoronaVirusApi.Config;
+using CoronaVirusApi.GraphQl.Queries;
+using CoronaVirusApi.GraphQl.Schemas;
+using CoronaVirusApi.GraphQl.Types;
 using CoronaVirusApi.HttpServices;
+using GraphQL;
+using GraphQL.Server;
+using GraphQL.Server.Ui.Playground;
+using GraphQL.Types;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -31,6 +38,11 @@ namespace CoronaVirusApi
     {
       services.AddApplicationInsightsTelemetry();
 
+      services.Configure<IISServerOptions>(options =>
+      {
+        options.AllowSynchronousIO = true;
+      });
+
       services.AddControllers()
                 .AddJsonOptions(options =>
                 {
@@ -48,6 +60,15 @@ namespace CoronaVirusApi
 
       services.AddHostedService<UpdateDataBackgroundService>();
 
+
+      services.AddSingleton<IDependencyResolver>(s => new FuncDependencyResolver(s.GetRequiredService));
+      services.AddSingleton<ISchema, AllDataSchema>();
+      services.AddSingleton<AllDataQuery>();
+      services.AddSingleton<CountryType>();
+      services.AddSingleton<CountryRecordType>();
+      services.AddSingleton<BucketType>();
+
+      services.AddGraphQL();
 
 
       JsonConvert.DefaultSettings = () => new JsonSerializerSettings
@@ -74,9 +95,14 @@ namespace CoronaVirusApi
 
       app.UseHttpsRedirection();
 
-      app.UseRouting();
+      app.UseGraphQL<ISchema>("/graphql");
+      // use graphql-playground at default url /ui/playground
+      app.UseGraphQLPlayground(new GraphQLPlaygroundOptions
+      {
+        Path = "/ui/playground",
+      });
 
-      app.UseAuthorization();
+      app.UseRouting();
 
       app.UseEndpoints(endpoints =>
       {

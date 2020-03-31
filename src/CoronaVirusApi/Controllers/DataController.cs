@@ -1,5 +1,4 @@
-﻿using CoronaVirusApi.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace CoronaVirusApi.Controllers
 {
@@ -15,9 +14,9 @@ namespace CoronaVirusApi.Controllers
     }
 
     [HttpGet("raw")]
-    public SourceData Raw()
+    public string Raw()
     {
-      return dataStorage.GetSourceData();
+      return dataStorage.GetSourceDataRaw();
     }
   }
 }

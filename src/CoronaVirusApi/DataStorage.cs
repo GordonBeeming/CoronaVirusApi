@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoronaVirusApi.Config;
@@ -15,7 +16,9 @@ namespace CoronaVirusApi
   public class DataStorage
   {
     private readonly List<Bucket> buckets;
-    private SourceData sourceData;
+    private List<Country> countries = new List<Country>();
+    private string sourceDataJson;
+
     private readonly AzureStorageConfig azureStorageConfig;
     private readonly ILogger<DataStorage> logger;
 
@@ -30,53 +33,29 @@ namespace CoronaVirusApi
         new Bucket(5,"5000 - 24999",5000, 24999),
         new Bucket(6,"> 25000",25000, null),
       };
-      sourceData = new SourceData(); // change to read from blob storage
+      sourceDataJson = JsonConvert.SerializeObject(new SourceData());
       this.azureStorageConfig = azureStorageConfig.Value;
       this.logger = logger;
 
       LoadSourceDataFromDisk();
     }
 
+    #region Graph QL
+
+    public List<Bucket> GetAllBuckets() => buckets;
+
+    public List<Country> GetAllCountries() => countries;
+
+    public Country GetCountryByGeoId(string geoId) => countries.FirstOrDefault(o => o.GeoId.Equals(geoId, StringComparison.InvariantCultureIgnoreCase));
+
+    public IEnumerable<CountryRecord> GetAllCountryRecords() => countries.SelectMany(o => o.Records);
+
+    #endregion
+
     public List<Bucket> GetBuckets() => buckets;
 
-    public SourceData GetSourceData() => sourceData;
+    public string GetSourceDataRaw() => sourceDataJson;
     public async Task SetSourceData(SourceData data, CancellationToken stoppingToken)
-    {
-      await SaveSourceDataToDisk(data, stoppingToken);
-      sourceData = data;
-    }
-
-    public void SetLatestLoadError()
-    {
-      if (sourceData != null)
-      {
-        sourceData.UpdateError = true;
-      }
-    }
-
-    private async void LoadSourceDataFromDisk()
-    {
-      var container = await GetContainer();
-
-      var jsonString = await DownloadJson("latest.json", container);
-      if (jsonString == null)
-      {
-        return;
-      }
-      try
-      {
-        SourceData data = JsonConvert.DeserializeObject<SourceData>(jsonString);
-        data.UpdateError = false;
-        sourceData = data;
-      }
-      catch (Exception ex)
-      {
-        SetLatestLoadError();
-        logger.LogError(ex, "Error deserializing latest json source data from storage");
-      }
-    }
-
-    private async Task SaveSourceDataToDisk(SourceData data, CancellationToken stoppingToken)
     {
       var jsonString = JsonConvert.SerializeObject(data);
 
@@ -84,6 +63,86 @@ namespace CoronaVirusApi
 
       await UploadJson(jsonString, $@"archive\{data.LastUpdate:yyyyMMdd-HHmmss}.json", container, stoppingToken);
       await UploadJson(jsonString, "latest.json", container, stoppingToken);
+
+      sourceDataJson = jsonString;
+
+      await UpdateGraphData(data, stoppingToken);
+    }
+
+    public Task UpdateGraphData(SourceData data, CancellationToken stoppingToken)
+    {
+      var countries = new List<Country>();
+      var sourceData = JsonConvert.DeserializeObject<SourceData>(sourceDataJson);
+      var geoIds = sourceData.Records.Select(o => o.GeoId.ToLowerInvariant()).Distinct();
+      foreach (var geoId in geoIds)
+      {
+        var firstMatch = sourceData.Records.FirstOrDefault(o => o.GeoId.Equals(geoId, StringComparison.InvariantCultureIgnoreCase));
+        var country = new Country
+        {
+          GeoId = firstMatch.GeoId,
+          CasesBucket = buckets.FirstOrDefault(oo => oo.Name == firstMatch.CasesBucket),
+          DeathsBucket = buckets.FirstOrDefault(oo => oo.Name == firstMatch.DeathsBucket),
+          CountriesAndTerritories = firstMatch.CountriesAndTerritories,
+          FocusCountry = firstMatch.FocusCountry,
+          PopData2018 = firstMatch.PopData2018?.Length > 0 ? Convert.ToInt32(firstMatch.PopData2018) : 0,
+        };
+        countries.Add(country);
+        var records = sourceData.Records.Where(o => o.GeoId.Equals(firstMatch.GeoId, StringComparison.InvariantCultureIgnoreCase));
+        foreach (var record in records)
+        {
+          var countryRecord = new CountryRecord
+          {
+            GeoId = firstMatch.GeoId,
+            Date = record.Date,
+            Day = Convert.ToInt32(record.Day),
+            Month = Convert.ToInt32(record.Month),
+            Year = Convert.ToInt32(record.Year),
+            Cases = record.CasesNumber,
+            Deaths = record.DeathsNumber,
+            CasesToDate = record.CasesToDate,
+            DeathsToDate = record.DeathsToDate,
+            DaysWithCases = record.DaysWithCases,
+            DaysWithDeaths = record.DaysWithDeaths,
+          };
+          country.Records.Add(countryRecord);
+        }
+      }
+      this.countries = countries;
+      return Task.CompletedTask;
+    }
+
+    public void SetLatestLoadError()
+    {
+      if (sourceDataJson != null)
+      {
+        var sourceData = JsonConvert.DeserializeObject<SourceData>(sourceDataJson);
+        sourceData.UpdateError = true;
+        sourceDataJson = JsonConvert.SerializeObject(sourceData);
+      }
+    }
+
+    private async void LoadSourceDataFromDisk()
+    {
+      var container = await GetContainer();
+
+      var sourceDataJson = await DownloadJson("latest.json", container);
+      if (sourceDataJson == null)
+      {
+        return;
+      }
+      try
+      {
+        SourceData sourceData = JsonConvert.DeserializeObject<SourceData>(sourceDataJson);
+        sourceData.UpdateError = false;
+        this.sourceDataJson = JsonConvert.SerializeObject(sourceData);
+
+        await UpdateGraphData(sourceData, CancellationToken.None);
+      }
+      catch (Exception ex)
+      {
+        SetLatestLoadError();
+        logger.LogError(ex, "Error deserializing latest json source data from storage");
+      }
     }
 
     private async Task UploadJson(string jsonString, string filePath, CloudBlobContainer container, CancellationToken stoppingToken)

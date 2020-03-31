@@ -2,7 +2,7 @@
 {
   public class Bucket
   {
-    public Bucket(byte id, string name, int min, int? max)
+    public Bucket(int id, string name, int min, int? max)
     {
       Id = id;
       Name = name;
@@ -10,7 +10,7 @@
       Max = max;
     }
 
-    public byte Id { get; }
+    public int Id { get; }
 
     public string Name { get; }
 
@@ -18,6 +18,6 @@
 
     public int? Max { get; }
 
-    public bool IsNumberMatch(int value) => Min <= value && (Max.HasValue ? (value >= Max.Value) : true);
+    public bool IsNumberMatch(int value) => Min <= value && (Max.HasValue ? (value <= Max.Value) : true);
   }
 }
