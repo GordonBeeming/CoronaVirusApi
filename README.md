@@ -6,6 +6,8 @@ services serves mainly as a cleanup service for that data enriching the data
 a bit as well with some extra information making it easier to use in tools
 like [Power BI Desktop](https://powerbi.microsoft.com/en-us/desktop/).
 
+![Publish Site Changes](https://github.com/Gordon-Beeming/CoronaVirusApi/workflows/Publish%20Site%20Changes/badge.svg)
+
 ## Projects
 
 If you use this data source and want to share your site from here in the 
