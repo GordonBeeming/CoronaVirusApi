@@ -114,48 +114,7 @@ namespace CoronaVirusApi
         endpoints.MapControllers();
         endpoints.MapGet("/", async context =>
         {
-          context.Response.ContentType = "text/html";
-          await WriteToBodyStart(context);
-          await context.Response.WriteAsync($@"
-<h1 style='margin-bottom: -15px;'>Corona Virus API</h1>
-<sub>another project by <a href='https://lazy-developer.xyz/' target='_blank'>the lazy developer</a></sub>
-<p>
-  This project is hosted on GitHub at
-  <a href='https://github.com/Gordon-Beeming' target='_blank'>Gordon-Beeming</a>
-  /
-  <a href='https://github.com/Gordon-Beeming/CoronaVirusApi' target='_blank'>CoronaVirusApi</a>
-<br/>
-    Latest Publish: v{typeof(Program).Assembly.GetName().Version}
-</p>
-");
-          foreach (var dataSource in endpoints.DataSources)
-          {
-            foreach (var endpoint in dataSource.Endpoints)
-            {
-              if (endpoint is RouteEndpoint routeEndpoint)
-              {
-                var method = "UNKNOWN";
-                HttpMethodMetadata? httpMethod = (HttpMethodMetadata)endpoint.Metadata.FirstOrDefault(o => o is HttpMethodMetadata);
-                if (httpMethod != null && httpMethod.HttpMethods.Count > 0)
-                {
-                  method = httpMethod.HttpMethods[0];
-                }
-                if (routeEndpoint.RoutePattern.RawText == "/")
-                {
-                  continue;
-                }
-                var id = Guid.NewGuid().ToString("N");
-                await context.Response.WriteAsync($@"
-<h4>{method} <a href='/{routeEndpoint.RoutePattern.RawText.ToLowerInvariant()}'>/{routeEndpoint.RoutePattern.RawText.ToLowerInvariant()}</a><br/>
-    <button id='btnShow{id}' onclick='document.getElementById(""pre{id}"").style = ""display: block;"";document.getElementById(""btnShow{id}"").style = ""display: none;"";document.getElementById(""btnHide{id}"").style = ""display: block;"";return false;'>show the deets</button>
-    <button id='btnHide{id}' style='display:none;' onclick='document.getElementById(""pre{id}"").style = ""display: none;"";document.getElementById(""btnHide{id}"").style = ""display: none;"";document.getElementById(""btnShow{id}"").style = ""display: block;"";return false;'>hide the deets</button>
-</h4>
-<pre id='pre{id}' style='display:none;'>{JsonConvert.SerializeObject(routeEndpoint.RoutePattern, Formatting.Indented)}</pre>
-");
-              }
-            }
-          }
-          await WriteFromBodyFinish(context);
+          await WriteHomePage(endpoints, context);
         });
       });
 
@@ -169,6 +128,55 @@ namespace CoronaVirusApi
       zaCulture.NumberFormat = zaCultureNumberFormat;
       CultureInfo.DefaultThreadCurrentCulture = zaCulture;
       CultureInfo.DefaultThreadCurrentUICulture = zaCulture;
+    }
+
+    private async Task WriteHomePage(IEndpointRouteBuilder endpoints, HttpContext context)
+    {
+      context.Response.ContentType = "text/html";
+      await WriteToBodyStart(context);
+      await context.Response.WriteAsync($@"
+<h1 style='margin-bottom: -15px;'>Corona Virus API</h1>
+<sub>another project by <a href='https://lazy-developer.xyz/' target='_blank'>the lazy developer</a></sub>
+<p>
+  This project is hosted on GitHub at
+  <a href='https://github.com/Gordon-Beeming' target='_blank'>Gordon-Beeming</a>
+  /
+  <a href='https://github.com/Gordon-Beeming/CoronaVirusApi' target='_blank'>CoronaVirusApi</a>
+<br/>
+    Latest Publish: v{typeof(Program).Assembly.GetName().Version}
+</p>
+<p>
+  Below are some static apis for raw data dumps, the api also supports <a href='/ui/playground'>Graph QL</a> for more custom queries.
+</p>
+");
+      foreach (var dataSource in endpoints.DataSources)
+      {
+        foreach (var endpoint in dataSource.Endpoints)
+        {
+          if (endpoint is RouteEndpoint routeEndpoint)
+          {
+            var method = "UNKNOWN";
+            HttpMethodMetadata? httpMethod = (HttpMethodMetadata)endpoint.Metadata.FirstOrDefault(o => o is HttpMethodMetadata);
+            if (httpMethod != null && httpMethod.HttpMethods.Count > 0)
+            {
+              method = httpMethod.HttpMethods[0];
+            }
+            if (routeEndpoint.RoutePattern.RawText == "/")
+            {
+              continue;
+            }
+            var id = Guid.NewGuid().ToString("N");
+            await context.Response.WriteAsync($@"
+<h4>{method} <a href='/{routeEndpoint.RoutePattern.RawText.ToLowerInvariant()}'>/{routeEndpoint.RoutePattern.RawText.ToLowerInvariant()}</a><br/>
+    <button id='btnShow{id}' onclick='document.getElementById(""pre{id}"").style = ""display: block;"";document.getElementById(""btnShow{id}"").style = ""display: none;"";document.getElementById(""btnHide{id}"").style = ""display: block;"";return false;'>show the deets</button>
+    <button id='btnHide{id}' style='display:none;' onclick='document.getElementById(""pre{id}"").style = ""display: none;"";document.getElementById(""btnHide{id}"").style = ""display: none;"";document.getElementById(""btnShow{id}"").style = ""display: block;"";return false;'>hide the deets</button>
+</h4>
+<pre id='pre{id}' style='display:none;'>{JsonConvert.SerializeObject(routeEndpoint.RoutePattern, Formatting.Indented)}</pre>
+");
+          }
+        }
+      }
+      await WriteFromBodyFinish(context);
     }
 
     private static async Task WriteToBodyStart(HttpContext context) =>
