@@ -44,11 +44,15 @@ namespace CoronaVirusApi
 
     public List<Bucket> GetAllBuckets() => buckets;
 
+    public Bucket? GetBucket(int id) => buckets.FirstOrDefault(o => o.Id == id);
+
     public List<Country> GetAllCountries() => countries;
 
-    public Country GetCountryByGeoId(string geoId) => countries.FirstOrDefault(o => o.GeoId.Equals(geoId, StringComparison.InvariantCultureIgnoreCase));
+    public Country? GetCountryByGeoId(string geoId) => countries.FirstOrDefault(o => o.GeoId.Equals(geoId, StringComparison.InvariantCultureIgnoreCase));
 
-    public IEnumerable<CountryRecord> GetAllCountryRecords() => countries.SelectMany(o => o.Records);
+    public List<CountryRecord> GetAllCountryRecords() => countries.SelectMany(o => o.Records).ToList();
+
+    public CountryRecord? GetCountryRecordByGeoIdAndDate(string geoId, DateTime date) => countries.FirstOrDefault(o => o.GeoId.Equals(geoId, StringComparison.InvariantCultureIgnoreCase))?.Records.FirstOrDefault(o => o.Date == date);
 
     #endregion
 
