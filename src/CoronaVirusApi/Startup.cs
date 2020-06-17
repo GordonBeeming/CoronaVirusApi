@@ -64,6 +64,7 @@ namespace CoronaVirusApi
       services.AddHttpClient<OpenDataHttpService>();
 
       services.AddHostedService<UpdateDataBackgroundService>();
+      services.AddHostedService<CleanupStorageBackgroundService>();
 
 
       services.AddSingleton<IDependencyResolver>(s => new FuncDependencyResolver(s.GetRequiredService));

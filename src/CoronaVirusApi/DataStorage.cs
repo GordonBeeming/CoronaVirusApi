@@ -59,6 +59,46 @@ namespace CoronaVirusApi
     public List<Bucket> GetBuckets() => buckets;
 
     public string GetSourceDataRaw() => sourceDataJson;
+
+    public async Task Clean(CancellationToken stoppingToken)
+    {
+      var container = await GetContainer();
+
+      var date = DateTime.Today.AddMonths(-4);
+      var earliestHistoryDate = DateTime.Today.AddDays(-30);
+      while (date < earliestHistoryDate)
+      {
+        BlobContinuationToken blobContinuationToken = new BlobContinuationToken();
+        do
+        {
+          if (stoppingToken.IsCancellationRequested)
+          {
+            break;
+          }
+          var blobs = await container.ListBlobsSegmentedAsync($"json/archive/{date.ToString("yyyyMMdd")}", true, BlobListingDetails.None,
+          5000, blobContinuationToken, null, null);
+
+          blobContinuationToken = blobs.ContinuationToken;
+          if (!blobs.Results.Any())
+          {
+            break;
+          }
+          foreach (IListBlobItem item in blobs.Results)
+          {
+            if (stoppingToken.IsCancellationRequested)
+            {
+              break;
+            }
+            if (item is CloudBlockBlob cloudBlockBlob)
+            {
+              await cloudBlockBlob.DeleteAsync();
+            }
+          }
+        } while (blobContinuationToken != null);
+        date = date.AddDays(1);
+      }
+    }
+
     public async Task SetSourceData(SourceData data, CancellationToken stoppingToken)
     {
       var jsonString = JsonConvert.SerializeObject(data);
