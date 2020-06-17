@@ -65,7 +65,7 @@ namespace CoronaVirusApi
       var container = await GetContainer();
 
       var date = DateTime.Today.AddMonths(-4);
-      var earliestHistoryDate = DateTime.Today.AddDays(-30);
+      var earliestHistoryDate = DateTime.Today.AddDays(-15);
       while (date < earliestHistoryDate)
       {
         BlobContinuationToken blobContinuationToken = new BlobContinuationToken();
