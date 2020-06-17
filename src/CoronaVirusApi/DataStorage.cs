@@ -105,7 +105,7 @@ namespace CoronaVirusApi
 
       var container = await GetContainer();
 
-      await UploadJson(jsonString, $@"archive\{data.LastUpdate:yyyyMMdd-HHmmss}.json", container, stoppingToken);
+      await UploadJson(jsonString, $@"archive\{data.LastUpdate:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.json", container, stoppingToken);
       await UploadJson(jsonString, "latest.json", container, stoppingToken);
 
       sourceDataJson = jsonString;
