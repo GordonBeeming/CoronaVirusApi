@@ -26,6 +26,8 @@ namespace CoronaVirusApi.Models
     public string GeoId { get; set; }
     public string CountryCode { get; set; }
     public string PopData2018 { get; set; }
+    public string PopData2019 { get; set; }
+    public string PopData => PopData2018 ?? PopData2019;
     public int CasesToDate { get; set; }
     public int DeathsToDate { get; set; }
     public int DaysWithCases { get; set; }
@@ -33,6 +35,9 @@ namespace CoronaVirusApi.Models
     public bool FocusCountry { get; set; }
     public string CasesBucket { get; set; }
     public string DeathsBucket { get; set; }
+    public string ContinentExp { get; set; }
+    [JsonPropertyName("Cumulative_number_for_14_days_of_COVID-19_cases_per_100000")]
+    public string Cumulative_number_for_14_days_of_COVID19_cases_per_100000 { get; set; }
 
     [JsonIgnore]
     public DateTime Date => DateTime.ParseExact(DateRep, "dd/MM/yyyy", null);
