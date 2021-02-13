@@ -1,5 +1,6 @@
 # Corona Virus API
 
+
 Open Data have a [data source](https://opendata.ecdc.europa.eu/covid19/casedistribution/json/) 
 which can be flaky at times with the format of the json it returns so this 
 services serves mainly as a cleanup service for that data enriching the data
@@ -15,3 +16,7 @@ repository feel free to do a PR with the link to your app.
 
 - [Sample Power BI Report](reports/Sample-Power-BI-Report.pbix)
 
+## Project Inactive
+
+The dataset has changed and this was built as a easy way to pull some data into power bi and also play with graphql. THe source will remain 
+here but the site have been taken offline.
